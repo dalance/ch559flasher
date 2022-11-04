@@ -36,12 +36,13 @@ struct Options {
 
 fn main() {
     let options = Options::parse();
-    let mut ch559 = Ch559::new();
-
-    if !ch559.is_connected() {
-        println!("CH559 Not Found");
-        std::process::exit(exitcode::USAGE);
-    }
+    let mut ch559 = match Ch559::new() {
+        Ok(ch559) => ch559,
+        Err(e) => {
+            println!("{}", e);
+            std::process::exit(exitcode::USAGE);
+        }
+    };
     if let Some(seed) = options.seed {
         println!("random seed: {}", seed);
         ch559.set_seed(seed);
@@ -61,7 +62,7 @@ fn main() {
             std::process::exit(exitcode::IOERR);
         }
         if let Some(filename) = options.filename.as_ref() {
-            match ch559.write(&filename, true, false, options.fullfill) {
+            match ch559.write(filename, true, false, options.fullfill) {
                 Ok(()) => println!("write: complete"),
                 Err(error) => {
                     println!("write: {}", error);
@@ -75,7 +76,7 @@ fn main() {
     }
     if options.compare {
         if let Some(filename) = options.filename.as_ref() {
-            match ch559.write(&filename, false, false, options.fullfill) {
+            match ch559.write(filename, false, false, options.fullfill) {
                 Ok(()) => println!("compare: complete"),
                 Err(error) => {
                     println!("compare: {}", error);
@@ -116,7 +117,7 @@ fn main() {
             std::process::exit(exitcode::IOERR);
         }
         if let Some(filename) = options.filename.as_ref() {
-            match ch559.write(&filename, true, true, options.fullfill) {
+            match ch559.write(filename, true, true, options.fullfill) {
                 Ok(()) => println!("write_data: complete"),
                 Err(error) => {
                     println!("write_data: {}", error);
@@ -130,7 +131,7 @@ fn main() {
     }
     if options.compare_data {
         if let Some(filename) = options.filename.as_ref() {
-            match ch559.write(&filename, false, true, options.fullfill) {
+            match ch559.write(filename, false, true, options.fullfill) {
                 Ok(()) => println!("compare_data: complete"),
                 Err(error) => {
                     println!("compare_data: {}", error);
